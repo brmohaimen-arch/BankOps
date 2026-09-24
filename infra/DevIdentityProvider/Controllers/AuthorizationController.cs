@@ -29,15 +29,17 @@ public class AuthorizationController : ControllerBase
         var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         if (!result.Succeeded || result.Principal is null)
         {
-            // A relative path, not Request.GetEncodedUrl()'s absolute URL — LocalRedirect (used
-            // once the user actually logs in) rejects absolute URLs even for the same host, by
-            // design, to close off open-redirect attacks. Keep the whole round-trip relative.
-            return Challenge(
-                authenticationSchemes: CookieAuthenticationDefaults.AuthenticationScheme,
-                properties: new AuthenticationProperties
-                {
-                    RedirectUri = Request.Path + Request.QueryString,
-                });
+            // A plain Redirect(), not Challenge(authenticationSchemes: Cookie...) — inside
+            // OpenIddict's authorization-endpoint pipeline, the Cookie scheme's ChallengeResult
+            // came back as a real HTTP 401 with a Location header attached, not a 302. curl-based
+            // manual testing didn't catch this because curl doesn't auto-follow 3xx either way —
+            // I was reading the Location header myself. A real browser's top-level navigation
+            // does NOT follow a 401 the way it follows a 302, so the login page never opened.
+            // A relative path (not Request.GetEncodedUrl()'s absolute URL) — LocalRedirect, used
+            // once login actually succeeds, rejects absolute URLs by design to close off open
+            // redirects, so the whole round-trip stays relative throughout.
+            var returnUrl = Uri.EscapeDataString(Request.Path + Request.QueryString);
+            return Redirect($"/login?ReturnUrl={returnUrl}");
         }
 
         var identity = new ClaimsIdentity(
@@ -82,11 +84,24 @@ public class AuthorizationController : ControllerBase
         return LocalRedirect(string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl);
     }
 
-    [HttpGet("~/logout")]
+    // Without this, react-oidc-context's signoutRedirect() has no end_session_endpoint to call —
+    // it clears local app state, but the dev IdP's cookie session survives. RequireAuth then
+    // immediately calls signinRedirect() again, and since the cookie is still valid, the user is
+    // silently re-authenticated with no login prompt. "Sign out" looked like it worked and didn't.
+    [HttpGet("~/connect/logout")]
+    [HttpPost("~/connect/logout")]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> Logout()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        return Content("Signed out.", "text/plain");
+
+        var request = HttpContext.GetOpenIddictServerRequest();
+        return SignOut(
+            authenticationSchemes: OpenIddict.Server.AspNetCore.OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+            properties: new AuthenticationProperties
+            {
+                RedirectUri = request?.PostLogoutRedirectUri ?? "/",
+            });
     }
 
     private static string LoginPage(string? returnUrl, string? error)

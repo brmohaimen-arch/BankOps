@@ -37,6 +37,7 @@ builder.Services.AddOpenIddict()
     {
         options.SetTokenEndpointUris("connect/token");
         options.SetAuthorizationEndpointUris("connect/authorize");
+        options.SetEndSessionEndpointUris("connect/logout");
         options.AllowClientCredentialsFlow();
         options.AllowAuthorizationCodeFlow().RequireProofKeyForCodeExchange();
         options.RegisterScopes("bankops.api", Scopes.OpenId, Scopes.Profile);
@@ -54,6 +55,7 @@ builder.Services.AddOpenIddict()
         options.UseAspNetCore()
             .EnableTokenEndpointPassthrough()
             .EnableAuthorizationEndpointPassthrough()
+            .EnableEndSessionEndpointPassthrough()
             .DisableTransportSecurityRequirement(); // plain HTTP is fine for a localhost dev tool
     });
 
@@ -107,6 +109,7 @@ using (var scope = app.Services.CreateScope())
             {
                 Permissions.Endpoints.Authorization,
                 Permissions.Endpoints.Token,
+                Permissions.Endpoints.EndSession,
                 Permissions.GrantTypes.AuthorizationCode,
                 Permissions.ResponseTypes.Code,
                 Permissions.Prefixes.Scope + "bankops.api",

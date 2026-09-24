@@ -1,0 +1,41 @@
+{
+  "appName": "BankOps",
+  "environmentBadge": "بيئة التطوير",
+  "nav": {
+    "catalog": "دليل الخدمات",
+    "appearance": "المظهر",
+    "audit": "سجل التدقيق"
+  },
+  "signOut": "تسجيل الخروج",
+  "loading": "جارٍ التحميل…",
+  "status": {
+    "unknown": "غير معروف",
+    "stale": "قديم",
+    "healthy": "سليم",
+    "warning": "تحذير",
+    "degraded": "متدهور",
+    "critical": "حرج"
+  },
+  "dashboard": {
+    "title": "نظرة عامة",
+    "emptyServices": "لا توجد خدمات مسجلة بعد."
+  },
+  "catalog": {
+    "title": "دليل الخدمات",
+    "owner": "المالك",
+    "criticality": "الأهمية الحرجة",
+    "environment": "البيئة"
+  },
+  "appearance": {
+    "title": "المظهر",
+    "primaryColor": "اللون الأساسي",
+    "save": "حفظ",
+    "revert": "التراجع إلى السابق"
+  },
+  "audit": {
+    "title": "سجل التدقيق",
+    "action": "الإجراء",
+    "principal": "المستخدم",
+    "occurredAt": "وقت الحدوث"
+  }
+}

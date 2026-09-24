@@ -1,0 +1,41 @@
+{
+  "appName": "BankOps",
+  "environmentBadge": "Development",
+  "nav": {
+    "catalog": "Service catalog",
+    "appearance": "Appearance",
+    "audit": "Audit log"
+  },
+  "signOut": "Sign out",
+  "loading": "Loading…",
+  "status": {
+    "unknown": "Unknown",
+    "stale": "Stale",
+    "healthy": "Healthy",
+    "warning": "Warning",
+    "degraded": "Degraded",
+    "critical": "Critical"
+  },
+  "dashboard": {
+    "title": "Overview",
+    "emptyServices": "No services registered yet."
+  },
+  "catalog": {
+    "title": "Service catalog",
+    "owner": "Owner",
+    "criticality": "Criticality",
+    "environment": "Environment"
+  },
+  "appearance": {
+    "title": "Appearance",
+    "primaryColor": "Primary color",
+    "save": "Save",
+    "revert": "Revert to previous"
+  },
+  "audit": {
+    "title": "Audit log",
+    "action": "Action",
+    "principal": "Principal",
+    "occurredAt": "Occurred at"
+  }
+}

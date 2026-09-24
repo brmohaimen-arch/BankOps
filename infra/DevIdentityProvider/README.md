@@ -41,7 +41,19 @@ Public SPA client (no secret — PKCE substitutes for one): `bankops-web`, redir
 
 A real gotcha hit building this: the cookie challenge's `RedirectUri` must be a **relative** path/query, not `Request.GetEncodedUrl()`'s absolute URL — `LocalRedirect` (used once login actually succeeds) rejects absolute URLs even for the same host by design, to close off open-redirect attacks. Passing an absolute URL through crashed with `InvalidOperationException: The supplied URL is not local`.
 
-Full round-trip verified manually with curl (authorize → login redirect → login POST → authorize again → code → token exchange with the matching `code_verifier` → decoded JWT has the right `sub`/`role`/`name`) and automated in `tests/BankOps.Api.IntegrationTests/InteractiveLoginTests.cs`.
+**A second, more consequential gotcha, found only once apps/web actually drove this in a real browser (2026-09-24), not curl:** `Challenge(authenticationSchemes: Cookie..., ...)` for the unauthenticated case returned a genuine **HTTP 401 with a `Location` header** instead of a 302 — inside OpenIddict's authorization-endpoint pipeline, the Cookie scheme's `ChallengeResult` doesn't behave the way it would in a plain MVC app. curl-based testing throughout Phase 1/2 backend work never caught this, because curl doesn't auto-follow either 401 or 302 — the manual tests were always reading the `Location` header themselves regardless of status code. A real browser's top-level navigation only follows 3xx automatically, so the login page silently never opened for an actual user. Fixed by replacing `Challenge()` with a plain `Redirect($"/login?ReturnUrl={...}")` in `AuthorizationController.Authorize()` — sidesteps the Cookie-scheme/OpenIddict interaction entirely instead of debugging it further.
+
+Full round-trip verified manually with curl (authorize → login redirect → login POST → authorize again → code → token exchange with the matching `code_verifier` → decoded JWT has the right `sub`/`role`/`name`), automated in `tests/BankOps.Api.IntegrationTests/InteractiveLoginTests.cs`, **and separately re-verified in an actual browser** (Claude's browser pane) — which is what caught the 401-vs-302 bug above; the automated/curl tests could not have caught it since neither auto-follows redirects either way.
+
+## Sign-out / end-session (added 2026-09-24)
+
+`/connect/logout` — OpenIddict's end-session endpoint (`SetEndSessionEndpointUris`), so `react-oidc-context`'s `signoutRedirect()` has somewhere real to go. Three real, separate bugs hit getting this working, each only surfacing when tested in an actual browser:
+
+1. **No end-session endpoint existed at all.** `signoutRedirect()` cleared local SPA state, but the IdP's cookie session survived — `RequireAuth` immediately called `signinRedirect()` again, and since the cookie was still valid, the user was silently re-authenticated with no login prompt. "Sign out" looked like it worked and didn't.
+2. **`post_logout_redirect_uri` rejected as invalid** even though it exactly matched the registered `PostLogoutRedirectUris` — OpenIddict needs `client_id` in the end-session request to know which client's registered URIs to check against, and doesn't fall back to resolving it from the `id_token_hint`'s `aud`/`azp` claim the way the OIDC spec allows. `oidc-client-ts` doesn't send `client_id` on sign-out by default. Fixed by passing it explicitly: `signoutRedirect({ extraQueryParams: { client_id: "bankops-web" } })` in `apps/web`.
+3. **`unauthorized_client`** — the `bankops-web` client registration was missing `Permissions.Endpoints.EndSession`.
+
+Verified: sign-out now genuinely ends the session — confirmed by landing on the real login form afterward, not being silently re-authenticated.
 
 ## Known simplifications (dev-only, do not carry forward)
 
