@@ -16,6 +16,12 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie(options => options.LoginPath = "/login");
 builder.Services.AddAuthorization();
 
+// apps/web calls /connect/token via fetch (not a page navigation, unlike /connect/authorize) —
+// that's a real cross-origin XHR needing CORS, even though both run on localhost in dev.
+const string DevWebOrigin = "http://localhost:5173";
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
+    policy.WithOrigins(DevWebOrigin).AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseInMemoryDatabase("bankops-dev-idp");
@@ -116,6 +122,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

@@ -79,6 +79,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+// Dev-only: apps/web (Vite, localhost:5173) is a different origin than apps/api. A real
+// deployment would likely serve both from the same origin (no CORS needed) or from an approved
+// bank domain list — this stays narrow to the one dev origin, not a wildcard, even for a dev tool.
+const string DevWebOrigin = "http://localhost:5173";
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
+    policy.WithOrigins(DevWebOrigin).AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+
 var app = builder.Build();
 
 // GlobalExceptionHandler must be first — it's the last-resort catch for anything below it.
@@ -93,6 +100,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseMiddleware<CorrelationIdMiddleware>();
+
+app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();
