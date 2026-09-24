@@ -75,13 +75,33 @@ jobs:
         run: dotnet test
 
   api-auth-tests:
-    name: API auth tests (OIDC/RBAC, real token validation)
+    name: API auth + settings/audit tests (real OIDC, real disposable Postgres)
     runs-on: ubuntu-latest
+    # apps/api now opens a real DB connection at startup (modules/settings, modules/audit), so
+    # this job needs Postgres too — same disposable-service-container pattern as integration-tests.
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "10.0.x"
-      - name: Run auth tests
+      - name: Run auth + settings/audit tests
         working-directory: tests/BankOps.Api.IntegrationTests
+        env:
+          POSTGRES_ADMIN_HOST: localhost
+          POSTGRES_ADMIN_PORT: "5432"
+          POSTGRES_ADMIN_USER: postgres
+          POSTGRES_ADMIN_PASSWORD: postgres
         run: dotnet test

@@ -10,9 +10,16 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
+    <PackageReference Include="Npgsql" Version="9.0.3" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.19.1" />
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.19.1" />
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.19.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\contracts\BankOps.Contracts.csproj" />
+    <ProjectReference Include="..\..\modules\audit\BankOps.Modules.Audit.csproj" />
+    <ProjectReference Include="..\..\modules\settings\BankOps.Modules.Settings.csproj" />
   </ItemGroup>
 
 </Project>

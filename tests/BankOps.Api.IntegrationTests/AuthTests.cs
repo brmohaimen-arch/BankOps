@@ -28,6 +28,16 @@ public class AuthTests : IClassFixture<DevIdentityProviderFixture>, IAsyncLifeti
         // own default sources, which sidesteps that ordering problem entirely.
         Environment.SetEnvironmentVariable("Oidc__Authority", _devIdp.Authority);
 
+        // apps/api opens a real NpgsqlDataSource at startup regardless of whether a given test
+        // needs it (modules/settings, modules/audit). None of these tests touch DB-backed
+        // endpoints, but Program.cs still requires a syntactically valid connection string to
+        // start at all — a placeholder is enough (NpgsqlDataSource.Create doesn't connect
+        // eagerly). Set explicitly rather than relying on local dotnet user-secrets, which exist
+        // on this dev machine but not on a fresh CI runner or in SettingsAndAuditTests, which sets
+        // its own real one — this test must not depend on running before or after that one.
+        Environment.SetEnvironmentVariable(
+            "Secrets__BankOpsDbConnectionString", "Host=localhost;Database=unused_by_these_tests");
+
         _factory = new WebApplicationFactory<Program>();
         _client = _factory.CreateClient();
         return Task.CompletedTask;

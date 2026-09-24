@@ -20,7 +20,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\apps\api\BankOps.Api.csproj" />
+    <ProjectReference Include="..\BankOps.IntegrationTests\BankOps.IntegrationTests.csproj" />
   </ItemGroup>
 
 </Project>

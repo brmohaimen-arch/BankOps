@@ -1,8 +1,13 @@
 using BankOps.Api;
 using BankOps.Api.FeatureFlags;
 using BankOps.Api.Secrets;
+using BankOps.Contracts;
+using BankOps.Modules.Audit.Contracts;
+using BankOps.Modules.Audit.Infrastructure;
+using BankOps.Modules.Settings.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Npgsql;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -14,6 +19,22 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentPrincipal, HttpContextCurrentPrincipal>();
+
+// Read directly from configuration here rather than through ISecretResolver: the DI container
+// that would resolve ISecretResolver doesn't exist yet at this point in startup, and this is
+// functionally identical to what ConfigurationSecretResolver does (user-secrets in Development,
+// never appsettings.json).
+var dbConnectionString = builder.Configuration["Secrets:BankOpsDbConnectionString"]
+    ?? throw new InvalidOperationException(
+        "Missing Secrets:BankOpsDbConnectionString. For local dev: " +
+        "dotnet user-secrets set \"Secrets:BankOpsDbConnectionString\" \"<connection string>\"");
+builder.Services.AddSingleton(NpgsqlDataSource.Create(dbConnectionString));
+
+builder.Services.AddScoped<IAuditWriter, PostgresAuditWriter>();
+builder.Services.AddScoped<SettingsRepository>();
 
 // NFR-OBS-01: "Structured logs, metrics and traces share request/incident/correlation IDs."
 // Console exporter only for now — D-04 (which telemetry backend to actually reuse) is still an
