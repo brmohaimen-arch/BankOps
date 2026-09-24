@@ -1,5 +1,11 @@
+using BankOps.Api;
+using BankOps.Api.FeatureFlags;
+using BankOps.Api.Secrets;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +14,23 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+// NFR-OBS-01: "Structured logs, metrics and traces share request/incident/correlation IDs."
+// Console exporter only for now — D-04 (which telemetry backend to actually reuse) is still an
+// open Phase 0 decision; swapping to a real backend later is an exporter change here, not a
+// call-site change anywhere else.
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService("BankOps.Api"))
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()
+        .AddConsoleExporter())
+    .WithLogging(logging => logging.AddConsoleExporter());
+
+builder.Services.AddSingleton<IFeatureFlagService, ConfigurationFeatureFlagService>();
+builder.Services.AddSingleton<ISecretResolver, ConfigurationSecretResolver>();
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 // Dev-only issuer (infra/DevIdentityProvider) until D-01's actual IdP (Bank AD/Entra) is wired
 // up in a later phase. Authority/audience below are placeholders for that swap, not production
@@ -37,6 +60,9 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+// GlobalExceptionHandler must be first — it's the last-resort catch for anything below it.
+app.UseExceptionHandler();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -44,6 +70,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<CorrelationIdMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
