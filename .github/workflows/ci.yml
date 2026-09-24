@@ -39,3 +39,37 @@ jobs:
       - name: Build
         working-directory: apps/web
         run: npm run build
+
+  integration-tests:
+    name: Integration tests (disposable Postgres)
+    runs-on: ubuntu-latest
+    # A throwaway container, isolated from dev/test/production and torn down when the job ends —
+    # the genuine version of the isolation the local dev fixture only approximates (no Docker on
+    # the dev machine, so locally it's a disposable database on the same server, not a disposable
+    # server). See tests/BankOps.IntegrationTests/DisposableDatabaseFixture.cs.
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - name: Run integration tests
+        working-directory: tests/BankOps.IntegrationTests
+        env:
+          POSTGRES_ADMIN_HOST: localhost
+          POSTGRES_ADMIN_PORT: "5432"
+          POSTGRES_ADMIN_USER: postgres
+          POSTGRES_ADMIN_PASSWORD: postgres
+        run: dotnet test
