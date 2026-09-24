@@ -73,3 +73,15 @@ jobs:
           POSTGRES_ADMIN_USER: postgres
           POSTGRES_ADMIN_PASSWORD: postgres
         run: dotnet test
+
+  api-auth-tests:
+    name: API auth tests (OIDC/RBAC, real token validation)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - name: Run auth tests
+        working-directory: tests/BankOps.Api.IntegrationTests
+        run: dotnet test

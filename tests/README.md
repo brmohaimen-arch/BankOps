@@ -15,4 +15,8 @@ Unauthorized access denied in API (object-level test, not just "route requires l
 
 ## `BankOps.IntegrationTests` (2026-09-24)
 
-Migration up/down against a genuinely disposable database — `DisposableDatabaseFixture.cs` creates a uniquely-named database, migrates it, tests run, then it's dropped. Locally that's still the same Postgres server as dev (no Docker on this dev machine — the fixture's own comments explain why); in CI (`.github/workflows/ci.yml`) it runs against a real disposable `postgres:18` service container instead, which is the actual isolation this exit-evidence item asks for. `apps/api`'s object-level auth test (the other Phase 1 exit-evidence item) is still manual curl commands, not encoded as an automated test yet — that's the next gap here, not this one.
+Migration up/down against a genuinely disposable database — `DisposableDatabaseFixture.cs` creates a uniquely-named database, migrates it, tests run, then it's dropped. Locally that's still the same Postgres server as dev (no Docker on this dev machine — the fixture's own comments explain why); in CI (`.github/workflows/ci.yml`) it runs against a real disposable `postgres:18` service container instead, which is the actual isolation this exit-evidence item asks for.
+
+## `BankOps.Api.IntegrationTests` (2026-09-24)
+
+Automates the other Phase 1 exit-evidence item (object-level auth, previously manual curl) against the real OIDC/JWT validation pipeline, not a substituted auth handler. See its own README for a real `WebApplicationFactory` + minimal-hosting config-timing gotcha hit while building it.

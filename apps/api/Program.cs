@@ -79,3 +79,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+// Makes Program reachable from WebApplicationFactory<Program> in tests/BankOps.Api.IntegrationTests
+// — top-level statements otherwise generate an internal Program class invisible to another project.
+public partial class Program;
