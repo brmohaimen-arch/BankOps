@@ -23,6 +23,17 @@ public class TokenController : ControllerBase
         var request = HttpContext.GetOpenIddictServerRequest() ??
             throw new InvalidOperationException("The OpenIddict request cannot be retrieved.");
 
+        if (request.IsAuthorizationCodeGrantType())
+        {
+            // The principal we SignIn'd with in AuthorizationController.Authorize() is stored
+            // server-side against the code OpenIddict issued; authenticating against its own
+            // scheme here retrieves it. PKCE (code_verifier vs. the code_challenge from /authorize)
+            // is validated by the OpenIddict server handler before this action even runs.
+            var authenticateResult = await HttpContext.AuthenticateAsync(
+                OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+            return SignIn(authenticateResult.Principal!, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+        }
+
         if (!request.IsClientCredentialsGrantType())
         {
             return Forbid(
@@ -31,7 +42,7 @@ public class TokenController : ControllerBase
                 {
                     [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.UnsupportedGrantType,
                     [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
-                        "This dev token endpoint only supports the client_credentials grant."
+                        "This dev token endpoint only supports the client_credentials and authorization_code grants."
                 }));
         }
 
