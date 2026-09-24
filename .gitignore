@@ -1,0 +1,17 @@
+# Confidential / not for the public repo
+.claude/
+documents/
+
+# .NET
+bin/
+obj/
+*.user
+
+# Node / Vite
+node_modules/
+dist/
+.vite/
+
+# OS
+.DS_Store
+Thumbs.db
