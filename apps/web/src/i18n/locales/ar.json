@@ -4,7 +4,8 @@
   "nav": {
     "catalog": "دليل الخدمات",
     "appearance": "المظهر",
-    "audit": "سجل التدقيق"
+    "audit": "سجل التدقيق",
+    "dashboard": "نظرة عامة"
   },
   "signOut": "تسجيل الخروج",
   "loading": "جارٍ التحميل…",
@@ -21,13 +22,40 @@
   },
   "dashboard": {
     "title": "نظرة عامة",
-    "emptyServices": "لا توجد خدمات مسجلة بعد."
+    "emptyServices": "لا توجد خدمات مسجلة بعد.",
+    "registeredServices": "الخدمات المسجلة",
+    "healthUnknownCount": "سلامة غير معروفة",
+    "byCriticality": "حسب الأهمية",
+    "criticalServices": "الخدمات الحرجة",
+    "healthUnknownTitle": "حالة السلامة غير معروفة لجميع الخدمات",
+    "healthUnknownBody": "لا يوجد مصدر مراقبة متصل بعد. تظهر الخدمات بحالة «غير معروف» بدلاً من حالة مُخمَّنة إلى أن يوفر نظام المراقبة الأدلة."
   },
   "catalog": {
     "title": "دليل الخدمات",
     "owner": "المالك",
     "criticality": "الأهمية الحرجة",
-    "environment": "البيئة"
+    "environment": "البيئة",
+    "code": "الرمز",
+    "name": "الاسم",
+    "site": "الموقع",
+    "health": "السلامة",
+    "service": "الخدمة",
+    "relation": "العلاقة",
+    "critical": "مسار حرج",
+    "graphVersion": "إصدار المخطط المنشور",
+    "dependsOn": "يعتمد على",
+    "neededBy": "مطلوب من قبل",
+    "noDependencies": "لا توجد تبعيات منشورة.",
+    "noDependents": "لا توجد خدمة أخرى تعتمد على هذه الخدمة.",
+    "loadFailed": "تعذر تحميل دليل الخدمات.",
+    "detailFailed": "تعذر تحميل هذه الخدمة.",
+    "register": {
+      "open": "تسجيل خدمة",
+      "title": "تسجيل خدمة جديدة",
+      "submit": "تسجيل",
+      "codeHint": "أحرف إنجليزية كبيرة وأرقام وشرطات، مثل CORE-BANKING.",
+      "codeTaken": "توجد خدمة مسجلة بهذا الرمز بالفعل."
+    }
   },
   "appearance": {
     "title": "المظهر",
@@ -75,5 +103,22 @@
     "generic": "أعاد الخادم خطأ (HTTP {{status}}).",
     "unreachable": "تعذر الوصول إلى واجهة BankOps البرمجية.",
     "correlationId": "المرجع: {{id}}"
+  },
+  "cancel": "إلغاء",
+  "yes": "نعم",
+  "no": "لا",
+  "criticality": {
+    "CRITICAL": "حرجة",
+    "HIGH": "عالية",
+    "MEDIUM": "متوسطة",
+    "LOW": "منخفضة"
+  },
+  "relation": {
+    "DEPENDS_ON": "يعتمد على",
+    "USES": "يستخدم",
+    "CONNECTS_TO": "يتصل بـ"
+  },
+  "health": {
+    "noSource": "لا يوجد مصدر مراقبة متصل بعد، لذلك لا توجد أدلة لعرض حالة السلامة."
   }
 }

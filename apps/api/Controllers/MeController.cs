@@ -17,6 +17,7 @@ public class MeController(ICurrentPrincipal currentPrincipal) : ControllerBase
 {
     private static readonly ModuleManifestEntry[] Modules =
     [
+        new("dashboard", "Overview", "/", RequiresRole: null),
         new("catalog", "Service catalog", "/catalog", RequiresRole: null),
         new("appearance", "Appearance", "/admin/appearance", RequiresRole: "admin"),
         new("audit", "Audit log", "/admin/audit", RequiresRole: "admin"),

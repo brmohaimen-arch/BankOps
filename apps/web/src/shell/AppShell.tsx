@@ -82,7 +82,7 @@ export function AppShell() {
           />
         </Sider>
         <Content style={{ padding: 24 }}>
-          <Outlet />
+          <Outlet context={capabilities} />
         </Content>
       </Layout>
     </Layout>

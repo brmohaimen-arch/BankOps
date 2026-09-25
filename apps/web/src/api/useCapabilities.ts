@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "react-oidc-context";
+import { useOutletContext } from "react-router-dom";
 import { apiFetch } from "./client";
 
 export interface ModuleManifestEntry {
@@ -60,4 +61,14 @@ export function useCapabilities() {
     loading: current === null,
     error: current?.error ?? null,
   };
+}
+
+// For pages rendered inside AppShell: the capabilities it already loaded, without a second fetch.
+// Use for presentation only (e.g. hiding an admin button) — apps/api enforces the real check.
+export function useShellCapabilities() {
+  return useOutletContext<Capabilities>();
+}
+
+export function hasRole(capabilities: Capabilities, role: string) {
+  return capabilities.user.roles.includes(role);
 }

@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Contracts/ is its own project (BankOps.Modules.Catalog.Contracts) so monitoring/incidents can
+       reference the published read interface without pulling in this module's Infrastructure/Api —
+       same layout as modules/audit. Exclude it here so it isn't compiled into two assemblies. -->
+  <ItemGroup>
+    <Compile Remove="Contracts\**" />
+    <None Remove="Contracts\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\contracts\BankOps.Contracts.csproj" />
+    <ProjectReference Include="Contracts\BankOps.Modules.Catalog.Contracts.csproj" />
+    <ProjectReference Include="..\audit\Contracts\BankOps.Modules.Audit.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="9.0.3" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+</Project>

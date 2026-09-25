@@ -5,11 +5,14 @@ const API_BASE = "http://localhost:5065";
 export class ApiError extends Error {
   status: number;
   correlationId: string | undefined;
+  // Parsed JSON error body when apps/api sent one (e.g. { code, errors } on a 400), else undefined.
+  body: unknown;
 
-  constructor(status: number, correlationId: string | undefined, message: string) {
+  constructor(status: number, correlationId: string | undefined, message: string, body?: unknown) {
     super(message);
     this.status = status;
     this.correlationId = correlationId;
+    this.body = body;
   }
 }
 
@@ -31,7 +34,8 @@ export async function apiFetch(
     // FR-404: "one correlation ID for user-visible failures" — apps/api's GlobalExceptionHandler
     // puts it in the ProblemDetails body; CorrelationIdMiddleware also echoes it as a header.
     const correlationId = response.headers.get("X-Correlation-Id") ?? undefined;
-    throw new ApiError(response.status, correlationId, `${init?.method ?? "GET"} ${path} failed`);
+    const body: unknown = await response.json().catch(() => undefined);
+    throw new ApiError(response.status, correlationId, `${init?.method ?? "GET"} ${path} failed`, body);
   }
 
   return response;

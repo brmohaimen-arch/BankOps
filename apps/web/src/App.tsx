@@ -4,7 +4,7 @@ import arEG from "antd/locale/ar_EG";
 import { AuthProvider, useAuth } from "react-oidc-context";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { oidcConfig } from "./auth/oidcConfig";
 import { AppShell } from "./shell/AppShell";
 import { CallbackPage } from "./pages/CallbackPage";
@@ -15,13 +15,24 @@ import { AuditPage } from "./pages/AuditPage";
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const auth = useAuth();
+  const { t } = useTranslation();
+  const needsSignIn = !auth.isLoading && !auth.isAuthenticated && !auth.activeNavigator && !auth.error;
 
-  if (auth.isLoading) {
-    return null;
+  // Start the redirect from an effect, not during render — calling signinRedirect() while
+  // rendering updates AuthProvider's state mid-render (React's "Cannot update a component while
+  // rendering a different component" warning) and can fire more than once per navigation.
+  useEffect(() => {
+    if (needsSignIn) {
+      void auth.signinRedirect();
+    }
+  }, [needsSignIn, auth]);
+
+  if (auth.error) {
+    // Without this, an unreachable IdP would leave a blank page (or retry in a loop).
+    return <div style={{ padding: 24 }}>{t("signInFailed", { message: auth.error.message })}</div>;
   }
 
   if (!auth.isAuthenticated) {
-    void auth.signinRedirect();
     return null;
   }
 

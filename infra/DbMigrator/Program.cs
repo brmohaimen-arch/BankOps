@@ -39,8 +39,16 @@ switch (direction)
         // once there is more than one migration to choose from.
         runner.MigrateDown(0);
         break;
+    case "seed":
+        // Dev-only synthetic data. Migrates up first so a fresh database can be seeded in one step.
+        runner.MigrateUp();
+        var inserted = await BankOps.DbMigrator.Seeds.CatalogSyntheticData.SeedAsync(connectionString);
+        Console.WriteLine(inserted > 0
+            ? $"Seeded {inserted} synthetic catalog services."
+            : "catalog.services already has data; synthetic seed skipped.");
+        break;
     default:
-        Console.Error.WriteLine($"Unknown direction '{direction}'. Use 'up' or 'down'.");
+        Console.Error.WriteLine($"Unknown direction '{direction}'. Use 'up', 'down' or 'seed'.");
         Environment.Exit(1);
         break;
 }

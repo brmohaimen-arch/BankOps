@@ -20,7 +20,7 @@ Navigation is generated from the reviewed module manifest + the server-supplied 
 
 ## Pages (2026-09-24)
 
-`AppearancePage` and `AuditPage` are real, working against `modules/settings`/`modules/audit`'s Phase 1 endpoints — not placeholders. Verified end-to-end in-browser: color change saves without a rebuild, shows up immediately in the audit log with the real logged-in user's identity (not a service-account artifact from earlier client_credentials testing). `DashboardPage`/`CatalogPage` are honest empty states — `modules/catalog` doesn't have real endpoints yet (next item on `documents/PHASE2_CHECKLIST.md`), and faking mock data there would contradict the design's own "never dress up missing data as a status" principle.
+`AppearancePage` and `AuditPage` are real, working against `modules/settings`/`modules/audit`'s Phase 1 endpoints — not placeholders. Verified end-to-end in-browser: color change saves without a rebuild, shows up immediately in the audit log with the real logged-in user's identity (not a service-account artifact from earlier client_credentials testing). `DashboardPage`/`CatalogPage` were honest empty states until `modules/catalog` had real endpoints — see below.
 
 ## Failure states (2026-09-25)
 
@@ -33,3 +33,16 @@ Every API-backed screen now says when its data didn't load, instead of showing s
 Also: the remaining hard-coded English strings (save/conflict messages, audit "Resource type", `FreshnessStamp`'s "as of … ago", the `maintenance` status, the callback page's sign-in error) are now in `en.json`/`ar.json`, with Arabic plural forms for the relative times. Both `oxlint` warnings are cleared (`Date.now()` during render, `setState` inside an effect).
 
 Verified in headless Chromium against the Vite dev server with a planted OIDC session and mocked apps/api responses: unreachable API, 401, viewer 403 on audit and appearance (English and Arabic), and the admin success paths. The same script against the previous code reproduced all three bugs.
+
+## Service catalog and dashboard (2026-09-25)
+
+Both now run against `modules/catalog`'s real endpoints (seed a dev DB with `infra/DbMigrator` → `dotnet run -- seed`).
+
+- **`CatalogPage`** — every registered service with criticality, environment, site, owner. Clicking a row opens `ServiceDrawer`: what the service depends on and what depends on it, each linking to that service. The open service lives in the URL (`/catalog?service=<id>`), so it can be linked to directly and browser back closes or steps back. Admins get **Register service** (`RegisterServiceModal`); the server's 400 field errors and 409 duplicate-code are shown against the matching inputs. The button is hidden for other roles, and apps/api returns 403 regardless.
+- **`DashboardPage`** — registered-service count, count by criticality, critical services. Health is **Unknown for every service, and the page says so up front** ("no monitoring source is connected yet"). With no monitoring module there is no evidence to show anything else, so this is the "unknown visible" exit evidence. **Stale** needs observation timestamps, which only monitoring will produce (Phase 3), so it can't be demonstrated yet without fabricating data.
+- **`UnknownHealth`** — the Unknown badge plus a tooltip giving the reason, used everywhere health would appear.
+- **Navigation** — `MeController`'s manifest now includes `dashboard` (`/`); before this there was no menu entry back to the overview.
+- **`useApiQuery`** — shared GET hook. Loading is derived per token + path, so opening another service shows loading rather than briefly showing the previous one's data.
+- **`RequireAuth` fix** — it called `signinRedirect()` during render, which React flags ("Cannot update a component while rendering a different component"); it now runs in an effect. A sign-in error is shown instead of leaving a blank page.
+
+Verified against the real stack: `infra/DevIdentityProvider` + `apps/api` on a seeded Postgres 18 + Vite, driven through real interactive login in headless Chromium. That covers the admin and viewer journeys (dashboard numbers, drawer navigation and back button, register with 400/409/success, audit entry, Arabic RTL, the viewer's hidden button plus a 403 on a direct POST) and sign-out still landing on the real login form. There were no console errors apart from Google Fonts certificate failures specific to that sandbox's proxy.

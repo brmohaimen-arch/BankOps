@@ -19,6 +19,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\contracts\BankOps.Contracts.csproj" />
     <ProjectReference Include="..\..\modules\audit\BankOps.Modules.Audit.csproj" />
+    <ProjectReference Include="..\..\modules\catalog\BankOps.Modules.Catalog.csproj" />
     <ProjectReference Include="..\..\modules\settings\BankOps.Modules.Settings.csproj" />
   </ItemGroup>
 

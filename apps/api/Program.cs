@@ -4,6 +4,8 @@ using BankOps.Api.Secrets;
 using BankOps.Contracts;
 using BankOps.Modules.Audit.Contracts;
 using BankOps.Modules.Audit.Infrastructure;
+using BankOps.Modules.Catalog.Contracts;
+using BankOps.Modules.Catalog.Infrastructure;
 using BankOps.Modules.Settings.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -35,6 +37,9 @@ builder.Services.AddSingleton(NpgsqlDataSource.Create(dbConnectionString));
 
 builder.Services.AddScoped<IAuditWriter, PostgresAuditWriter>();
 builder.Services.AddScoped<SettingsRepository>();
+builder.Services.AddScoped<CatalogRepository>();
+// The published read contract other modules depend on — same instance as the repository.
+builder.Services.AddScoped<ICatalogQuery>(sp => sp.GetRequiredService<CatalogRepository>());
 
 // NFR-OBS-01: "Structured logs, metrics and traces share request/incident/correlation IDs."
 // Console exporter only for now — D-04 (which telemetry backend to actually reuse) is still an

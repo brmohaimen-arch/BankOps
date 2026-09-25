@@ -4,7 +4,8 @@
   "nav": {
     "catalog": "Service catalog",
     "appearance": "Appearance",
-    "audit": "Audit log"
+    "audit": "Audit log",
+    "dashboard": "Overview"
   },
   "signOut": "Sign out",
   "loading": "Loading…",
@@ -21,13 +22,40 @@
   },
   "dashboard": {
     "title": "Overview",
-    "emptyServices": "No services registered yet."
+    "emptyServices": "No services registered yet.",
+    "registeredServices": "Registered services",
+    "healthUnknownCount": "Health unknown",
+    "byCriticality": "By criticality",
+    "criticalServices": "Critical services",
+    "healthUnknownTitle": "Health is Unknown for every service",
+    "healthUnknownBody": "No monitoring source is connected yet. Services show Unknown rather than a guessed status until monitoring supplies evidence."
   },
   "catalog": {
     "title": "Service catalog",
     "owner": "Owner",
     "criticality": "Criticality",
-    "environment": "Environment"
+    "environment": "Environment",
+    "code": "Code",
+    "name": "Name",
+    "site": "Site",
+    "health": "Health",
+    "service": "Service",
+    "relation": "Relation",
+    "critical": "Critical path",
+    "graphVersion": "Published graph version",
+    "dependsOn": "Depends on",
+    "neededBy": "Needed by",
+    "noDependencies": "No published dependencies.",
+    "noDependents": "No other service depends on this one.",
+    "loadFailed": "Could not load the service catalog.",
+    "detailFailed": "Could not load this service.",
+    "register": {
+      "open": "Register service",
+      "title": "Register a service",
+      "submit": "Register",
+      "codeHint": "Uppercase letters, digits and hyphens, e.g. CORE-BANKING.",
+      "codeTaken": "A service with this code is already registered."
+    }
   },
   "appearance": {
     "title": "Appearance",
@@ -63,5 +91,22 @@
     "generic": "The server returned an error (HTTP {{status}}).",
     "unreachable": "Could not reach the BankOps API.",
     "correlationId": "Reference: {{id}}"
+  },
+  "cancel": "Cancel",
+  "yes": "Yes",
+  "no": "No",
+  "criticality": {
+    "CRITICAL": "Critical",
+    "HIGH": "High",
+    "MEDIUM": "Medium",
+    "LOW": "Low"
+  },
+  "relation": {
+    "DEPENDS_ON": "Depends on",
+    "USES": "Uses",
+    "CONNECTS_TO": "Connects to"
+  },
+  "health": {
+    "noSource": "No monitoring source is connected yet, so there is no evidence to show a health status."
   }
 }
