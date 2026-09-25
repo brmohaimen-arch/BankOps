@@ -2,6 +2,8 @@ import { Layout, Menu, Tag, Button, Spin, Alert } from "antd";
 import { useAuth } from "react-oidc-context";
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { ApiError } from "../api/client";
+import { describeError } from "../api/describeError";
 import { useCapabilities } from "../api/useCapabilities";
 import { LanguageSwitch } from "./LanguageSwitch";
 
@@ -17,16 +19,32 @@ export function AppShell() {
   const { t, i18n } = useTranslation();
   const { capabilities, loading, error } = useCapabilities();
 
-  if (loading || !capabilities) {
+  // Error first: a failed fetch leaves capabilities null, so checking !capabilities before error
+  // would spin forever. A 401 here is most likely an expired token (no silent renew in dev), so
+  // offer a fresh sign-in rather than a dead end.
+  if (error) {
     return (
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 100 }}>
-        <Spin size="large" tip={t("loading")} />
-      </div>
+      <Alert
+        type="error"
+        showIcon
+        style={{ margin: 24 }}
+        title={t("errors.capabilitiesFailed")}
+        description={describeError(error, t)}
+        action={
+          error instanceof ApiError && error.status === 401 ? (
+            <Button onClick={() => void auth.signinRedirect()}>{t("signInAgain")}</Button>
+          ) : undefined
+        }
+      />
     );
   }
 
-  if (error) {
-    return <Alert type="error" message="Could not load capabilities" description={error.message} showIcon />;
+  if (loading || !capabilities) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", marginTop: 100 }}>
+        <Spin size="large" description={t("loading")} />
+      </div>
+    );
   }
 
   return (

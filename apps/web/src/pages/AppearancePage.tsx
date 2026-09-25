@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { ColorPicker, Form, Spin, Typography, message } from "antd";
+import { Alert, ColorPicker, Form, Spin, Typography, message } from "antd";
 import { useAuth } from "react-oidc-context";
 import { useTranslation } from "react-i18next";
 import { apiFetch, ApiError } from "../api/client";
+import { describeError } from "../api/describeError";
 
 interface SettingDto {
   namespace: string;
@@ -22,6 +23,7 @@ export function AppearancePage() {
   const [setting, setSetting] = useState<SettingDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [messageApi, contextHolder] = message.useMessage();
 
   const token = auth.user?.access_token;
@@ -33,8 +35,9 @@ export function AppearancePage() {
       .then((r) => r.json())
       .then((settings: SettingDto[]) => {
         setSetting(settings.find((s) => s.key === "primaryColor") ?? null);
+        setLoadError(null);
       })
-      .catch((err) => messageApi.error(`Failed to load: ${err.message}`))
+      .catch((err: unknown) => setLoadError(err))
       .finally(() => setLoading(false));
   };
 
@@ -53,14 +56,14 @@ export function AppearancePage() {
         method: "PUT",
         body: JSON.stringify({ value: color, expectedVersion: setting?.version ?? null }),
       });
-      messageApi.success("Saved — no rebuild required.");
+      messageApi.success(t("appearance.saved"));
       load();
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
-        messageApi.error("Someone else changed this setting — reloading the current value.");
+        messageApi.error(t("appearance.conflict"));
         load();
       } else {
-        messageApi.error(err instanceof Error ? err.message : String(err));
+        messageApi.error(describeError(err, t));
       }
     } finally {
       setSaving(false);
@@ -69,6 +72,22 @@ export function AppearancePage() {
 
   if (loading) {
     return <Spin size="large" />;
+  }
+
+  // Without a successful load there is no known current value — showing the picker with a default
+  // color would present a made-up value as the saved one.
+  if (loadError) {
+    return (
+      <>
+        <Typography.Title level={3}>{t("appearance.title")}</Typography.Title>
+        <Alert
+          type="error"
+          showIcon
+          title={t("appearance.loadFailed")}
+          description={describeError(loadError, t)}
+        />
+      </>
+    );
   }
 
   const currentColor = setting ? (JSON.parse(setting.value) as string) : "#1677ff";

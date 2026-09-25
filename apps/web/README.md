@@ -21,3 +21,15 @@ Navigation is generated from the reviewed module manifest + the server-supplied 
 ## Pages (2026-09-24)
 
 `AppearancePage` and `AuditPage` are real, working against `modules/settings`/`modules/audit`'s Phase 1 endpoints — not placeholders. Verified end-to-end in-browser: color change saves without a rebuild, shows up immediately in the audit log with the real logged-in user's identity (not a service-account artifact from earlier client_credentials testing). `DashboardPage`/`CatalogPage` are honest empty states — `modules/catalog` doesn't have real endpoints yet (next item on `documents/PHASE2_CHECKLIST.md`), and faking mock data there would contradict the design's own "never dress up missing data as a status" principle.
+
+## Failure states (2026-09-25)
+
+Every API-backed screen now says when its data didn't load, instead of showing something that reads as real data. All user-visible failure text goes through `src/api/describeError.ts` (401 / 403 / other HTTP / API unreachable, plus the correlation ID when apps/api sends one — FR-404). Three bugs fixed:
+
+- **`AppShell` spun forever when `/api/v1/me/capabilities` failed.** It checked "no capabilities yet" before checking the error, so the error alert was unreachable. This is the likely outcome whenever a token expires, because silent renew is off in dev. It now shows the error first, with a "Sign in again" button on 401.
+- **`AuditPage` showed "No data" on a 403.** A viewer who opened `/admin/audit` by URL saw an empty table, which reads as "nothing has been audited". It now shows a permission error.
+- **`AppearancePage` got stuck or showed a made-up value when loading failed.** It now shows the error, and the color picker only appears once a real value has loaded.
+
+Also: the remaining hard-coded English strings (save/conflict messages, audit "Resource type", `FreshnessStamp`'s "as of … ago", the `maintenance` status, the callback page's sign-in error) are now in `en.json`/`ar.json`, with Arabic plural forms for the relative times. Both `oxlint` warnings are cleared (`Date.now()` during render, `setState` inside an effect).
+
+Verified in headless Chromium against the Vite dev server with a planted OIDC session and mocked apps/api responses: unreachable API, 401, viewer 403 on audit and appearance (English and Arabic), and the admin success paths. The same script against the previous code reproduced all three bugs.

@@ -26,6 +26,5 @@ const COLOR_BY_STATUS: Record<HealthStatus, string> = {
 
 export function StatusBadge({ status }: { status: HealthStatus }) {
   const { t } = useTranslation();
-  const label = status === "maintenance" ? "Maintenance" : t(`status.${status}`);
-  return <Tag color={COLOR_BY_STATUS[status]}>{label}</Tag>;
+  return <Tag color={COLOR_BY_STATUS[status]}>{t(`status.${status}`)}</Tag>;
 }

@@ -8,13 +8,16 @@
   },
   "signOut": "Sign out",
   "loading": "Loading…",
+  "signInAgain": "Sign in again",
+  "signInFailed": "Sign-in failed: {{message}}",
   "status": {
     "unknown": "Unknown",
     "stale": "Stale",
     "healthy": "Healthy",
     "warning": "Warning",
     "degraded": "Degraded",
-    "critical": "Critical"
+    "critical": "Critical",
+    "maintenance": "Maintenance"
   },
   "dashboard": {
     "title": "Overview",
@@ -30,12 +33,35 @@
     "title": "Appearance",
     "primaryColor": "Primary color",
     "save": "Save",
-    "revert": "Revert to previous"
+    "revert": "Revert to previous",
+    "saved": "Saved — no rebuild required.",
+    "conflict": "Someone else changed this setting — reloading the current value.",
+    "loadFailed": "Could not load the current appearance settings."
   },
   "audit": {
     "title": "Audit log",
     "action": "Action",
     "principal": "Principal",
-    "occurredAt": "Occurred at"
+    "occurredAt": "Occurred at",
+    "resourceType": "Resource type",
+    "loadFailed": "Could not load the audit log."
+  },
+  "freshness": {
+    "asOf": "as of {{relative}}",
+    "justNow": "just now",
+    "minutesAgo_one": "{{count}}m ago",
+    "minutesAgo_other": "{{count}}m ago",
+    "hoursAgo_one": "{{count}}h ago",
+    "hoursAgo_other": "{{count}}h ago",
+    "daysAgo_one": "{{count}}d ago",
+    "daysAgo_other": "{{count}}d ago"
+  },
+  "errors": {
+    "capabilitiesFailed": "Could not load your navigation and permissions.",
+    "unauthorized": "Your session has expired or is no longer valid.",
+    "forbidden": "You don't have permission to view this.",
+    "generic": "The server returned an error (HTTP {{status}}).",
+    "unreachable": "Could not reach the BankOps API.",
+    "correlationId": "Reference: {{id}}"
   }
 }
